@@ -3,6 +3,9 @@ import {
   Box,
   createCliRenderer,
   Text,
+  t,
+  green,
+  italic,
   TextAttributes, InputRenderable, InputRenderableEvents
 } from "@opentui/core"
 import Fuse from "fuse.js"
@@ -99,9 +102,9 @@ function createEntityListBox() {
     return Box(
       { height: 1 },
       Text({ 
-        content: `${entity.entity_id} - ${entity.name}`,
+        content: t`${entity.attributes.friendly_name} ${green(italic(entity.state))}`,
         attributes: isSelected ? TextAttributes.BOLD : TextAttributes.NORMAL,
-        foreground: isSelected ? "#ffffff" : "#cccccc"
+        fg: isSelected ? "#ccccff" : "#999999"
       })
     );
   });
@@ -112,7 +115,7 @@ function createEntityListBox() {
   }
   
   return Box(
-    { id: "entity-list", flexDirection: "column", width: 52, height: 12, border: true },
+    { id: "entity-list", flexDirection: "column", width: 52, height: 12, border: true, borderColor: "#00ff00ff" },
     ...children
   );
 }
@@ -149,10 +152,17 @@ async function updateEntityList(query: string) {
 }
 
 async function selectEntity() {
+  console.debug("Selected entity index:" + selectedEntityIndex);
   if (selectedEntityIndex >= 0 && selectedEntityIndex < filteredEntities.length) {
     const entity = filteredEntities[selectedEntityIndex];
-    console.log(`Selected: ${entity.entity_id} - ${entity.name} (State: ${entity.state})`);
-    nameInput.value = entity.entity_id;
+    console.debug(entity);
+    //console.log(`Selected: ${entity.entity_id} - ${entity.name} (State: ${entity.state})`);
+    //nameInput.value = entity.attributes.friendly_name;
+    // TOOD: pop a control here for modifying the state with an appropriate control.
+    // i.e. lights and other boolean things should get a toggle control, numbers get a slider
+    // etc.
+    // That control should then be wired to update the state of the entity with the appropriate service
+    // to its class.
   }
 }
 
@@ -184,9 +194,13 @@ nameInput.onKeyDown = async (key: KeyEvent) => {
       scrollOffset = 0;
       rebuildLayout();
     }
-  } else if (key.name === 'enter') {
+  } else if (key.name === 'return') {
+     console.debug("enter pressed");
     await selectEntity();
+  } else {
+    console.debug(key.name);
   }
+
 };
 
 nameInput.focus();
