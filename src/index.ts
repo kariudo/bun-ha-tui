@@ -156,12 +156,13 @@ async function selectEntity() {
   }
 }
 
-nameInput.on(InputRenderableEvents.CHANGE, async (value) => {
+nameInput.on(InputRenderableEvents.INPUT, async (value) => {
+  console.debug("change detected");
   await updateEntityList(value);
 });
 
-nameInput.on(InputRenderableEvents.KEY_PRESS, async (key) => {
-  if (key === 'ArrowDown') {
+nameInput.onKeyDown = async (key: KeyEvent) => {
+  if (key.name === 'down') {
     if (selectedEntityIndex < filteredEntities.length - 1) {
       selectedEntityIndex++;
       // Scroll down if needed
@@ -170,7 +171,7 @@ nameInput.on(InputRenderableEvents.KEY_PRESS, async (key) => {
       }
       rebuildLayout();
     }
-  } else if (key === 'ArrowUp') {
+  } else if (key.name === 'up') {
     if (selectedEntityIndex > 0) {
       selectedEntityIndex--;
       // Scroll up if needed
@@ -183,10 +184,10 @@ nameInput.on(InputRenderableEvents.KEY_PRESS, async (key) => {
       scrollOffset = 0;
       rebuildLayout();
     }
-  } else if (key === 'Enter') {
+  } else if (key.name === 'enter') {
     await selectEntity();
   }
-});
+};
 
 nameInput.focus();
 
@@ -199,3 +200,4 @@ fuse = new Fuse(entities, {
 });
 filterEntities("");
 rebuildLayout();
+renderer.console.show();
